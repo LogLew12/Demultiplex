@@ -16,8 +16,8 @@
     The histograms show that the average quality score of the indexes is around 35 so that will be the cuttoff used. Biological reads don't need as strict of a cutoff since filtering indexes' quality will also filter out the corresponding biological reads, so their cutoff will be 30.
     ```
     3. ```
-gunzip -c /projects/bgmp/shared/2017_sequencing/1294_S1_L008_R2_001.fastq.gz /projects/bgmp/shared/2017_sequencing/1294_S1_L008_R3_001.fastq.gz | sed -n "2~4p" | grep -c "N" 7304664
-```
+	gunzip -c /projects/bgmp/shared/2017_sequencing/1294_S1_L008_R2_001.fastq.gz /projects/bgmp/shared/2017_sequencing/1294_S1_L008_R3_001.fastq.gz | sed -n "2~4p" | grep -c "N" 7304664
+	```
     
 ## Part 2
 1. Define the problem
