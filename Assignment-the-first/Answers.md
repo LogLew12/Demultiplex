@@ -12,6 +12,10 @@
 
 2. Per-base NT distribution
     1. Use markdown to insert your 4 histograms here.
+    ![histogram Read 1](Histogram_r1.png "Read 1 Histogram")
+    ![histogram Read 2](Histogram_r4.png "Read 2 Histogram")
+    ![histogram Index 1](Histogram_r2.png "Index 1 Histogram")
+    ![histogram Index 2](Histogram_r3.png "Index 2 Histogram")
     2. ```
     The histograms show that the average quality score of the indexes is around 35 so that will be the cuttoff used. Biological reads don't need as strict of a cutoff since filtering indexes' quality will also filter out the corresponding biological reads, so their cutoff will be 30.
     ```
