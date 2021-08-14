@@ -41,13 +41,14 @@ for line in fh_bars:
         files1[barcode] = f1
         files2[barcode] = f2
 
+#openning swapped and unknown files
 swap_r1 = open("swapped_R1_out.fastq", "w")
 swap_r2 = open("swapped_R2_out.fastq", "w")
 unknown_r1 = open("unknown_R1_out.fastq", "w")
 unknown_r2 = open("unknown_R2_out.fastq", "w")
-
+#I maybe could have used file.writelines() instead of this
 def write_file(ls, out):
-    '''takes a list and an output file and write every item
+    '''takes a list and an output file and writes every item
     as a line in the file'''
     for i in ls:
         out.write(i + "\n")
@@ -77,17 +78,19 @@ def up_counter(count_dict, key):
         count_dict[key] += 1
     except:
         count_dict[key] = 1
-
+#initializing lists to hold each record
 record_read1 = []
 record_read2 = []
 record_index1 = []
 record_index2 = []
+#initializing counters (and two dictionaries of counters) to count differnt kinds of reads
 unknown_counter = 0
 total_read_counter = 0
 total_match_counter = 0
 total_swapped_counter = 0
 swapped_count_dict = {}
 match_count_dict = {}
+#looping through all input fastq files
 for r1, r2, i1, i2 in zip(fh_r1, fh_r2, fh_i1, fh_i2):
     if len(record_read1) < 4:
         r1 = r1.strip()
@@ -98,27 +101,39 @@ for r1, r2, i1, i2 in zip(fh_r1, fh_r2, fh_i1, fh_i2):
         record_read2.append(r2)
         record_index1.append(i1)
         record_index2.append(i2)
+        #only continues if all four lines of the record are appended to the list
         if len(record_read1) == 4:
+            #getting the reverse comp from index 2 fastq and replacing it in the list
             record_index2[1] = revcomp(record_index2[1])
+            #appending the indexes to the headers
             record_read1[0] = record_read1[0] + "-" + record_index1[1] + "-" + record_index2[1]
             record_read2[0] = record_read2[0] + "-" + record_index1[1] + "-" + record_index2[1]
+            #checking if the indexes are not one the given ones, checks in Ns are in the index, and checks if the average index quality score is below the cutoff
             if (record_index1[1] not in expected_barcode) or (record_index2[1] not in expected_barcode) or ("N" in record_index1[1]) or ("N" in record_index2[1]) or (check_qscore(record_index1[3], args.cutoff)) or (check_qscore(record_index2[3], args.cutoff)):
+                #writing read records to "unknown" files
                 write_file(record_read1, unknown_r1)
                 write_file(record_read2, unknown_r2)
                 unknown_counter += 1
                 total_read_counter += 1
+            #if indexes are not the same (if they have been swapped)
             elif (record_index1[1] != record_index2[1]):
+                #writing to swapped files
                 write_file(record_read1, swap_r1)
                 write_file(record_read2, swap_r2)
+                #incrementing a counter in a dictionary for this pair of indexes
                 up_counter(swapped_count_dict, expected_barcode[record_index1[1]] + "-" + expected_barcode[record_index2[1]])
                 total_swapped_counter += 1
                 total_read_counter += 1
+            #if records are the same
             elif (record_index1[1] == record_index2[1]):
+                #write to indexes corresponding files
                 write_file(record_read1, files1[record_index1[1]])
                 write_file(record_read2, files2[record_index1[1]])
+                #incrementing a counter in a dictionary for this index
                 up_counter(match_count_dict, expected_barcode[record_index1[1]])
                 total_read_counter += 1
                 total_match_counter += 1
+            #empty the lists containing the records
             record_read1 = []
             record_read2 = []
             record_index1 = []
@@ -126,6 +141,7 @@ for r1, r2, i1, i2 in zip(fh_r1, fh_r2, fh_i1, fh_i2):
             # For testing
             # if total_read_counter == 1000000:
             #     break
+#closing all files
 fh_r1.close()
 fh_r2.close()
 fh_i1.close()
@@ -138,8 +154,9 @@ for i in files1:
 for j in files2:
     files2[j].close()
 
-
+#writing the report file
 with open("Demux_output_report.tsv", "w") as out_fh:
+    #This try and except are here since I was getting a divide by zero error. I fixed it but I'm leaving this here just in case.
     try:
         out_fh.write("Category" + "\t" + "Number of Reads" + "\t" + "Percent of Total" "\t" + "Percent of Section" + "\n")
         out_fh.write("Total Reads" + "\t" + str(total_read_counter) + "\t" + str((total_read_counter/total_read_counter)*100) + "\t" + str((total_read_counter/total_read_counter)*100) + "\n")
